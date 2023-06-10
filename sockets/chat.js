@@ -1,5 +1,5 @@
 //chat.js
-module.exports = (io, socket, onlineUsers) => {
+module.exports = (io, socket, onlineUsers, channels) => {
 
     socket.on('new user', (username) => {
         //Save the username as key to access the user's socket id
@@ -28,17 +28,19 @@ module.exports = (io, socket, onlineUsers) => {
         io.emit('user has left', onlineUsers);
     });
 
-    // Listen for "disconnect" socket event
-    socket.on('disconnect', () => {
-        console.log(`User disconnected: ${socket.username}`);
-        // Remove the disconnected user from the online user list
-        // Remove the corresponding element from the DOM using jQuery or plain JavaScript
-        // Example: $('.users-online').find(`[data-username="${socket.username}"]`).remove();
-    });
-
     // Register new channel
     socket.on('new channel', (newChannel) => {
-        console.log(newChannel);
+        //Save the new channel to our channels object. The array will hold the messages.
+        channels[newChannel] = [];
+        //Have the socket join the new channel room.
+        socket.join(newChannel);
+        //Inform all clients of the new channel.
+        io.emit('new channel', newChannel);
+        //Emit to the client that made the new channel, to change their channel to the one they made.
+        socket.emit('user changed channel', {
+            channel: newChannel,
+            messages: channels[newChannel]
+        });
     });
 
 }

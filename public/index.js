@@ -38,10 +38,10 @@ $(document).ready(() => {
     window.location.href = '/'; // Redirect to login form
   });
 
-  $('#new-channel-btn').click( () => {
+  $('#new-channel-btn').click(() => {
     let newChannel = $('#new-channel-input').val();
-  
-    if(newChannel.length > 0){
+
+    if (newChannel.length > 0) {
       // Emit the new channel to the server
       socket.emit('new channel', newChannel);
       $('#new-channel-input').val("");
@@ -79,6 +79,29 @@ $(document).ready(() => {
     for (username in onlineUsers) {
       $('.users-online').append(`<p>${username}</p>`);
     }
+  });
+
+  // Add the new channel to the channels list (Fires for all clients)
+  socket.on('new channel', (newChannel) => {
+    $('.channels').append(`<div class="channel">${newChannel}</div>`);
+  });
+
+  // Make the channel joined the current channel. Then load the messages.
+  // This only fires for the client who made the channel.
+  socket.on('user changed channel', (data) => {
+    $('.channel-current').addClass('channel');
+    $('.channel-current').removeClass('channel-current');
+    $(`.channel:contains('${data.channel}')`).addClass('channel-current');
+    $('.channel-current').removeClass('channel');
+    $('.message').remove();
+    data.messages.forEach((message) => {
+      $('.message-container').append(`
+      <div class="message">
+        <p class="message-user">${message.sender}: </p>
+        <p class="message-text">${message.message}</p>
+      </div>
+    `);
+    });
   });
 
 })
