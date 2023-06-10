@@ -5,6 +5,8 @@ $(document).ready(() => {
   socket.emit('get online users');
   //Each user should be in the general channel by default.
   socket.emit('user changed channel', "General");
+  // Get channels from server
+  socket.emit('get channels');
 
   //Users can change the channel by clicking on its name.
   $(document).on('click', '.channel', (e)=>{
@@ -12,9 +14,9 @@ $(document).ready(() => {
     socket.emit('user changed channel', newChannel);
   });
 
-  $('#create-user-btn').click((e) => {
+  $('#create-user-btn').click((e)=>{
     e.preventDefault();
-    if ($('#username-input').val().length > 0) {
+    if($('#username-input').val().length > 0){
       socket.emit('new user', $('#username-input').val());
       // Save the current user when created
       currentUser = $('#username-input').val();
@@ -47,10 +49,10 @@ $(document).ready(() => {
     window.location.href = '/'; // Redirect to login form
   });
 
-  $('#new-channel-btn').click(() => {
+  $('#new-channel-btn').click( () => {
     let newChannel = $('#new-channel-input').val();
-
-    if (newChannel.length > 0) {
+  
+    if(newChannel.length > 0){
       // Emit the new channel to the server
       socket.emit('new channel', newChannel);
       $('#new-channel-input').val("");
@@ -81,7 +83,7 @@ $(document).ready(() => {
   socket.on('get online users', (onlineUsers) => {
     //You may have not have seen this for loop before. It's syntax is for(key in obj)
     //Our usernames are keys in the object of onlineUsers.
-    for (username in onlineUsers) {
+    for(username in onlineUsers){
       $('.users-online').append(`<div class="user-online">${username}</div>`);
     }
   })
@@ -89,10 +91,10 @@ $(document).ready(() => {
   //Refresh the online user list
   socket.on('user has left', (onlineUsers) => {
     $('.users-online').empty();
-    for (username in onlineUsers) {
+    for(username in onlineUsers){
       $('.users-online').append(`<p>${username}</p>`);
     }
-  });
+  })
 
   // Add the new channel to the channels list (Fires for all clients)
   socket.on('new channel', (newChannel) => {
@@ -109,12 +111,20 @@ $(document).ready(() => {
     $('.message').remove();
     data.messages.forEach((message) => {
       $('.message-container').append(`
-      <div class="message">
-        <p class="message-user">${message.sender}: </p>
-        <p class="message-text">${message.message}</p>
-      </div>
-    `);
+        <div class="message">
+          <p class="message-user">${message.sender}: </p>
+          <p class="message-text">${message.message}</p>
+        </div>
+      `);
     });
+  })
+
+  socket.on('get channels', (channels) => {
+    for (let channel in channels) {
+      if (channel !== "General") {
+        $('.channels').append(`<div class="channel">${channel}</div>`);
+      }
+    }
   });
 
 })

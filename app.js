@@ -13,7 +13,7 @@ let channels = {"General" : []};
 io.on("connection", (socket) => {
   // Make sure to send the users to our chat file
   require('./sockets/chat.js')(io, socket, onlineUsers, channels);
-})
+});
 
 //Express View Engine for Handlebars
 const exphbs = require('express-handlebars');
