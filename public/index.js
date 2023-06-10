@@ -1,18 +1,8 @@
 $(document).ready(() => {
   const socket = io.connect();
 
-  // STRETCH CHALLENGE - LOG OUT BUTTON
-  // Log out button click event
-  $('#logout-btn').click((e) => {
-    e.preventDefault();
-    socket.disconnect();
-    window.location.href = '/'; // Redirect to login form
-  });
-
   //Keep track of the current user
   let currentUser;
-  // Get the online users from the server
-  socket.emit('get online users');
 
   $('#create-user-btn').click((e) => {
     e.preventDefault();
@@ -40,28 +30,38 @@ $(document).ready(() => {
     }
   });
 
+  // STRETCH CHALLENGE - LOG OUT BUTTON
+  // Log out button click event
+  $('#logout-btn').click((e) => {
+    e.preventDefault();
+    socket.disconnect();
+    window.location.href = '/'; // Redirect to login form
+  });
+
+  $('#new-channel-btn').click( () => {
+    let newChannel = $('#new-channel-input').val();
+  
+    if(newChannel.length > 0){
+      // Emit the new channel to the server
+      socket.emit('new channel', newChannel);
+      $('#new-channel-input').val("");
+    }
+  });
+
   //socket listeners
   socket.on('new user', (username) => {
     console.log(`${username} has joined the chat`);
     $('.users-online').append(`<div class="user-online">${username}</div>`);
   })
 
-  //Refresh the online user list
-  socket.on('user has left', (onlineUsers) => {
-    $('.users-online').empty();
-    for (username in onlineUsers) {
-      $('.users-online').append(`<p>${username}</p>`);
-    }
-  });
-
   //Output the new message
   socket.on('new message', (data) => {
     $('.message-container').append(`
-    <div class="message">
-      <p class="message-user">${data.sender}: </p>
-      <p class="message-text">${data.message}</p>
-    </div>
-  `);
+      <div class="message">
+        <p class="message-user">${data.sender}: </p>
+        <p class="message-text">${data.message}</p>
+      </div>
+    `);
   })
 
   //Show the users on the page
@@ -72,5 +72,13 @@ $(document).ready(() => {
       $('.users-online').append(`<div class="user-online">${username}</div>`);
     }
   })
+
+  //Refresh the online user list
+  socket.on('user has left', (onlineUsers) => {
+    $('.users-online').empty();
+    for (username in onlineUsers) {
+      $('.users-online').append(`<p>${username}</p>`);
+    }
+  });
 
 })

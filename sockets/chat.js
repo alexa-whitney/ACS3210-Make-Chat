@@ -36,4 +36,9 @@ module.exports = (io, socket, onlineUsers) => {
         // Example: $('.users-online').find(`[data-username="${socket.username}"]`).remove();
     });
 
+    // Register new channel
+    socket.on('new channel', (newChannel) => {
+        console.log(newChannel);
+    });
+
 }
